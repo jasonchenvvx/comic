@@ -11,6 +11,7 @@ from moviepy.config import change_settings
 from moviepy.editor import *
 from moviepy.video.fx.all import fadein, fadeout
 from typing import List
+import utils
 
 # 初始化配置
 # load_dotenv()
@@ -44,13 +45,15 @@ change_settings({"FONTPATH": ":".join(font_paths)})
 
 
 # Apple Silicon (M1/M2 芯片)
-change_settings({"IMAGEMAGICK_BINARY": "/opt/homebrew/bin/magick"})
+# change_settings({"IMAGEMAGICK_BINARY": "/opt/homebrew/bin/magick"})
+# Windows NVIDIA
+change_settings({"IMAGEMAGICK_BINARY": "C:\Program Files\ImageMagick-7.1.1-Q16-HDRI\magick.exe"})
 
 CONFIG = {
     "output_dir": "output",
     "temp_dir": "temp",
     "video_res": (576, 1024),
-    "font": "Source-Han-Serif-SC",
+    "font": "Arial",
     "font_size": 40,
     "text_color": "white",
     "bg_color": "rgba(0,0,0,0.5)",
@@ -149,35 +152,7 @@ def generate_speech(text: str, filename: str) -> float:
     audio.close()
     return duration
 
-def generate_comic_image(prompt: str, filename: str) -> str:
-    # url = "https://api.siliconflow.cn/v1/images/generations"
-    # payload = {
-    #     "model": "black-forest-labs/FLUX.1-schnell",
-    #     "prompt": f"创建一个{prompt}",
-    #     "seed": 4999999999
-    # }
-    # headers = {
-    #     "Authorization": "Bearer sk-mxwtcsithzksgmgxumqakjubzgcksuriyxcxfvpjwfwzxvff",
-    #     "Content-Type": "application/json"
-    # }
-    # max_retries = 10
-    # retry_delay = 2  # 秒
-    #
-    # for attempt in range(max_retries):
-    #     try:
-    #         response = requests.request("POST", url, json=payload, headers=headers)
-    #         response.raise_for_status()  # 需要添加重试的代码行[8]
-    #         break
-    #     except HTTPError as e:
-    #         if e.response.status_code == 503 and attempt < max_retries-1:
-    #             retry_delay = retry_delay * (2)  # 指数退避
-    #             print(f"系统繁忙，{retry_delay*(attempt+1)}秒后重试...")
-    #             time.sleep(retry_delay*(attempt+1))
-    #         else:
-    #             raise
-    #
-    # print(response.text)
-    # print(response)
+def generate_comic_image_by_API(prompt: str, filename: str) -> str:
     print('----sync call, please wait a moment----')
     response = ImageSynthesis.call(api_key=ALI_API_KEY,
                               model="wanx2.1-t2i-turbo",
@@ -194,17 +169,11 @@ def generate_comic_image(prompt: str, filename: str) -> str:
     else:
         print('sync_call Failed, status_code: %s, code: %s, message: %s' %
               (rsp.status_code, rsp.code, rsp.message))
+    return filename
 
-    # image_url = response.json()['data'][0]['url']
-    # img_data = requests.get(image_url).content
-    #
-    # with open(filename, 'wb') as f:
-    #     f.write(img_data)
-
-    # 调整图片尺寸
-    # img = Image.open(filename)
-    # img = img.resize(CONFIG['video_res'])
-    # img.save(filename)
+def generate_comic_image_from_local_model(prompt: str, filename: str) -> str:
+    print('----Generating pictures using local machine----')
+    utils.invoke_txt2img_model(prompt, filename)
     return filename
 
 def create_subtitle_clip(text: str, duration: float) -> TextClip:
@@ -234,7 +203,7 @@ def generate_video(text: str, output_file: str = "output.mp4"):
 
         # 生成漫画图片
         image_file = os.path.join(CONFIG['temp_dir'], f"image_{idx}.png")
-        generate_comic_image(sentence, image_file)
+        generate_comic_image_from_local_model(sentence, image_file)
 
         small_audio_sentence = split_audio_text(sentence)
         for small_idx, small_sentence in enumerate(small_audio_sentence):
