@@ -18,6 +18,7 @@ import utils
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 change_settings({"IMAGEMAGICK_BINARY": "/opt/homebrew/bin/magick"})
 ALI_API_KEY = "sk-8a67588417f64ad188403ba3cede211a"
+FILE_PATH = "resources/text_file.txt"
 
 print(OPENAI_API_KEY)
 # openai.api_key = OPENAI_API_KEY
@@ -251,7 +252,7 @@ def process_single_file(file_path: str, num: str):
 def split_large_file(file_path: str, output_dir: str, max_words=2000) -> List[str]:
     """分割大文件为多个小文件[7]"""
     chunks = []
-    with open("text_file.txt", "r", encoding="utf-8") as f:
+    with open(FILE_PATH, "r", encoding="utf-8") as f:
         words = f.read().split()
 
     for i in range(0, len(words), max_words):
@@ -286,7 +287,7 @@ if __name__ == "__main__":
     #     workers=os.cpu_count()
     # )
     
-    process_single_file("text_file.txt", f"{datetime.now().strftime('%y%m%d-%H-%M-%S')}")
+    process_single_file(FILE_PATH, f"{datetime.now().strftime('%y%m%d-%H-%M-%S')}")
     # clip = create_subtitle_clip("测试字幕", 5)
     # clip.save_frame("output.png")  # 检查单帧效果
 
