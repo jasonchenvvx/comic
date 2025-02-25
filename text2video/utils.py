@@ -33,8 +33,8 @@ def invoke_txt2img_model(prompt: str, filename: str):
         "n_iter": 1,
         "steps": 20,
         "cfg_scale": 7,
-        "width": 1440,
-        "height": 2560,
+        "width": 576,
+        "height": 1024,
         "restore_faces": False,
         "tiling": False,
         "override_settings": {
