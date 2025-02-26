@@ -10,30 +10,16 @@ from http import HTTPStatus
 from moviepy.config import change_settings
 from moviepy.editor import *
 from moviepy.video.fx.all import fadein, fadeout
+from pathlib import Path
 from typing import List
+import time
+
 import utils
 
 # 初始化配置
-# load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-change_settings({"IMAGEMAGICK_BINARY": "/opt/homebrew/bin/magick"})
 ALI_API_KEY = "sk-8a67588417f64ad188403ba3cede211a"
 FILE_PATH = "resources/text_file.txt"
-
-print(OPENAI_API_KEY)
-# openai.api_key = OPENAI_API_KEY
-# openai.api_base = "https://api.siliconflow.cn/v1/images/generations"
-# client = OpenAI(api_key="sk-mxwtcsithzksgmgxumqakjubzgcksuriyxcxfvpjwfwzxvff", base_url="https://api.siliconflow.cn/v1/images/generations")
 API_TOKEN = "sk-mxwtcsithzksgmgxumqakjubzgcksuriyxcxfvpjwfwzxvff"
-
-from pathlib import Path
-
-speech_file_path = Path(__file__).parent / "siliconcloud-generated-speech.mp3"
-
-# client = OpenAI(
-#     api_key=f"{API_TOKEN}", # 从 https://cloud.siliconflow.cn/account/ak 获取
-#     base_url="https://api.siliconflow.cn/v1"
-# )
 # 添加系统字体路径到 MoviePy 配置
 font_paths = [
     "/usr/share/fonts",          # Linux
@@ -41,20 +27,17 @@ font_paths = [
     os.path.expanduser("~/Library/Fonts"),  # macOS 用户字体
     "C:/Windows/Fonts"           # Windows
 ]
-
 change_settings({"FONTPATH": ":".join(font_paths)})
-
-
 # Apple Silicon (M1/M2 芯片)
-# change_settings({"IMAGEMAGICK_BINARY": "/opt/homebrew/bin/magick"})
+change_settings({"IMAGEMAGICK_BINARY": "/opt/homebrew/bin/magick"})
 # Windows NVIDIA
-change_settings({"IMAGEMAGICK_BINARY": "C:\Program Files\ImageMagick-7.1.1-Q16-HDRI\magick.exe"})
+# change_settings({"IMAGEMAGICK_BINARY": "C:\Program Files\ImageMagick-7.1.1-Q16-HDRI\magick.exe"})
 
 CONFIG = {
     "output_dir": "output",
     "temp_dir": "temp",
     "video_res": (576, 1024),
-    "font": "Arial",
+    "font": "Source Han Serif SC",
     "font_size": 40,
     "text_color": "white",
     "bg_color": "rgba(0,0,0,0.5)",
@@ -64,6 +47,30 @@ CONFIG = {
         "duration": 0.5
     }
 }
+
+
+import sys
+import platform
+
+def set_imagemagick_config():
+    config = {}
+
+    # macOS 系统判断
+    if sys.platform == 'darwin':
+        # Apple Silicon (M1/M2) 架构检测
+        if platform.machine() == 'arm64':
+            config["IMAGEMAGICK_BINARY"] = "/opt/homebrew/bin/magick"
+        # Intel 芯片 macOS
+        else:
+            config["IMAGEMAGICK_BINARY"] = "/usr/local/bin/magick"
+
+    # Windows 系统判断
+    elif sys.platform.startswith('win32'):
+        config["IMAGEMAGICK_BINARY"] = r"C:\Program Files\ImageMagick-7.1.1-Q16-HDRI\magick.exe"
+
+    # 应用配置
+    if config:
+        change_settings(config)
 
 def setup_directories():
     """创建输出目录"""
@@ -281,14 +288,10 @@ def parallel_job_processor(input_dir: str, output_dir: str, workers=4):
     return results
 
 if __name__ == "__main__":
-    # results = parallel_job_processor(
-    #     input_dir="/Users/jason/IdeaProjects/ComicGenerator",
-    #     output_dir="processed_chunks",
-    #     workers=os.cpu_count()
-    # )
-    
+    start_time = time.time()
+    set_imagemagick_config()
     process_single_file(FILE_PATH, f"{datetime.now().strftime('%y%m%d-%H-%M-%S')}")
-    # clip = create_subtitle_clip("测试字幕", 5)
-    # clip.save_frame("output.png")  # 检查单帧效果
 
-    print(f"处理完成，共处理 {len(results)} 个文件块")
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"耗时: {elapsed_time:.6f} 秒")
