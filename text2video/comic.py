@@ -12,6 +12,7 @@ from moviepy.editor import *
 from moviepy.video.fx.all import fadein, fadeout
 from pathlib import Path
 from typing import List
+import time
 
 import utils
 
@@ -287,5 +288,10 @@ def parallel_job_processor(input_dir: str, output_dir: str, workers=4):
     return results
 
 if __name__ == "__main__":
+    start_time = time.time()
     set_imagemagick_config()
     process_single_file(FILE_PATH, f"{datetime.now().strftime('%y%m%d-%H-%M-%S')}")
+
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"耗时: {elapsed_time:.6f} 秒")
