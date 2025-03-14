@@ -18,7 +18,21 @@ def save_base64_image(base64_str, filepath):
         return None
 
 def invoke_txt2img_model(prompt: str, filename: str):
+    # prompt_json = json.loads(prompt)
+    # # Clean up whitespace and newlines
+    # positive_prompt = prompt_json['positive_prompt']
+    # negative_prompt = prompt_json['negative_prompt']
+    # print(positive_prompt)
+    # print(negative_prompt)
+    # Split into positive and negative prompts
     print(prompt)
+    positive_prompt, negative_prompt = prompt.split("Negative", 1)
+    print(positive_prompt)
+    print(negative_prompt)
+
+    # Clean up whitespace and newlines
+    positive_prompt = positive_prompt.strip().replace("\n", " ")
+    negative_prompt = negative_prompt.strip().replace("\n", " ")
     # API配置
     api_url = "http://127.0.0.1:7860/sdapi/v1/txt2img"
     headers = {"Content-Type": "application/json"}
@@ -26,22 +40,22 @@ def invoke_txt2img_model(prompt: str, filename: str):
     # 请求参数
     payload = {
         "denoising_strength": 0,
-        "prompt": prompt,
-        "negative_prompt": "",
-        "seed": -1,
+        "prompt": positive_prompt,
+        "negative_prompt": negative_prompt,
+        "seed": 661556997210625,
         "batch_size": 1,
         "n_iter": 1,
-        "steps": 20,
-        "cfg_scale": 7,
+        "steps": 35,
+        "cfg_scale": 9,
         "width": 576,
         "height": 1024,
         "restore_faces": False,
         "tiling": False,
         "override_settings": {
-            "sd_model_checkpoint": "makotoShinkaiStyle_v10.safetensors [4c69e15cf9]"
+            "sd_model_checkpoint": "animagineXLV31_v31.safetensors [e3c47aedb0]"
         },
         "script_args": [0, True, True, "LoRA", 1, 1],
-        "sampler_index": "DPM++ 2M"
+        "sampler_name": "DPM++ 2M Karras"
     }
 
     try:

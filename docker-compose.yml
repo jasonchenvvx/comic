@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  jimeng-free-api:
+    container_name: jimeng-free-api
+    image: vinlic/jimeng-free-api:latest
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - TZ=Asia/Shanghai
